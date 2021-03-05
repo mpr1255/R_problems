@@ -25,7 +25,7 @@ names(target_strings_1) <-  rep("intubation", length(target_strings_1))
 
 Sys.setlocale("LC_CTYPE", locale = "C")
 # path <- ("./nested_for_loop_to_map/data")
-# path_fzmatchbig <- (r"(C:\Users\m\projects\DBHERE\data\merged\txt_clean)")
+path_fzmatchbig <- (r"(C:\Users\m\projects\DBHERE\data\merged\txt_clean)")
 path_fzmatchbig <- ("nested_for_loop_to_map/data/")
 file_list_fzmatchbig <- as_utf8(list.files(path_fzmatchbig))
 
@@ -75,6 +75,7 @@ dfout <- dfout %>% unnest_longer(paper) # 9 seconds with 21k files and 44 search
 dfout <- dfout[["paper"]] %>% as_tibble(.name_repair = "unique") #0.22s
 
 DT <- as.data.table(dfout) #0.04s
+View(DT)
 
 split_combine_columns <- function(x){
   s_target <- x[1:as.integer(length(target_strings_1))]
@@ -86,8 +87,22 @@ split_combine_columns <- function(x){
 }
 
 # define a NULL matrix. Then make it a data.table object.
-dt_final <- matrix(, nrow = as.integer(length(target_strings_1)*4) , ncol = 0)
-as.data.table(dt_final)
+# dt_final <- matrix(, nrow = as.integer(length(target_strings_1)*4) , ncol = 0)
+# as.data.table(dt_final)
+# 
+# TRYING PAT'S BFM APPROACH
+
+
+BFM<- matrix(nrow=176, ncol=2732)
+Starter<-1
+Ender <- 0
+
+for (col in colnames(DT)){
+  cols <- ncol(split_combine_columns(DT[,..col]))
+  Ender<- Ender+cols
+  BFM[,(Starter:Ender)]
+  Starter <- Starter + cols
+}
 
 
 # THIS IS THE PROBLEM AREA!! THIS LOOP RUNNING OVER THAT FUNCTION -----------------------------------
