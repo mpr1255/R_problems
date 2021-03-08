@@ -41,3 +41,4 @@ vignettes/*.pdf
 
 # Hide data
 # nested_for_loop_to_map/data/*
+nested_for_loop_to_map/data/dt_int_2.txt

@@ -75,7 +75,6 @@ dfout <- dfout %>% unnest_longer(paper) # 9 seconds with 21k files and 44 search
 dfout <- dfout[["paper"]] %>% as_tibble(.name_repair = "unique") #0.22s
 
 DT <- as.data.table(dfout) #0.04s
-View(DT)
 
 split_combine_columns <- function(x){
   s_target <- x[1:as.integer(length(target_strings_1))]
@@ -140,18 +139,48 @@ tb_final <- tb_final %>%
 
 #SAVE THIS OBJECT
 # tb_final %>% write_rds("./data/tb_final.Rds")
+# 
+Sys.setlocale("LC_CTYPE", locale = "C")
+dt_final  <-  as.data.table(read_rds(r"(C:\Users\m\projects\dead_donor\data\tb_final.Rds)"))
+options(datatable.prettyprint.char=15L)
 
-tb_set_threshold <- tb_final %>% 
-  filter(s_score < .3)
 
+dt_set_threshold <- dt_final[s_score < .4]
+
+dt_set_threshold[,length(unique(doc_id))]
+
+
+
+# function for grabbing context
 get_context <- function(doc_id, location){
   file <- doc_id
   
   s_full <- readtext(paste0(path_fzmatchbig,"\\",file), encoding='utf-8')[[2]]
   
   return(substr(s_full, location-50, location+nchar(location)+50))
-  
 }
+
+tb_w_context <- dt_set_threshold[,s_context := get_context(doc_id, as.integer(s_location))]
+
+dt_int_2 <- tb_w_context[s_context %like% "供"][s_context %like% "体"][s_context %like% "插管"][, intubation_score := 2]
+
+# test2 <- dt_int_2[, c("drop", "id", "drop") := tstrsplit(doc_id, "--", fixed=TRUE)]
+
+# dt_int_2 %>% fwrite("nested_for_loop_to_map/data/dt_int_2.txt")
+
+
+
+
+
+
+
+dt_int_2[,length(unique(doc_id))]
+
+test
+options(datatable.prettyprint.char=10L)
+dt_int_2[,doc_id]
+
+
 
 tb_w_context <- tb_set_threshold %>% 
   mutate(s_context = get_context(doc_id, as.integer(s_location)))
@@ -165,3 +194,4 @@ tb_w_context %>%
 
 
 
+options(datatable.prettyprint.char=20L)
